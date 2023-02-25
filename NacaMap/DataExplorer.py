@@ -6,16 +6,22 @@ shapefile_path = r"C:\Users\mille\PycharmProjects\naca-react-django-app\NacaMap\
 
 # Read the shapefile into a geopandas dataframe
 gdf = gpd.read_file(shapefile_path)
+gdf = gdf.dropna(subset=['geometry'])
 
 # Replace income_data_path with the actual path to your income data CSV file
 income_data_path = r"C:\Users\mille\PycharmProjects\naca-react-django-app\NacaMap\data\Income\ACSST5Y2021.S1903-Data_new.csv"
 
 # Read the income data CSV file into a pandas dataframe
 income_df = pd.read_csv(income_data_path)
-income_df = income_df.rename(columns={"GEO_ID": "GEOID"})
+income_df = income_df.rename(columns={"GEO_ID": "GEOID", "geometry": "income_geometry"})
+income_df['MedianIncome'] = pd.to_numeric(income_df['MedianIncome'], errors='coerce')
+
+# Remove the "1400000US" prefix from the GEOID column
+income_df["GEOID"] = income_df["GEOID"].str.replace("1400000US", "")
 
 # Join the shapefile and the income data by the "GEOID" column
 joined_df = gdf.merge(income_df, on="GEOID")
+
 
 # Make sure that both datasets have the same coordinate reference system (CRS)
 # In this example, we assume that the CRS of the shapefile is EPSG:4326

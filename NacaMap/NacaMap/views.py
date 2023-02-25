@@ -1,6 +1,7 @@
 from django.shortcuts import render
 import folium
 import pandas as pd
+import geopandas as gpd
 from folium import Element
 
 def update_map(request):
@@ -15,31 +16,41 @@ def update_map(request):
 
 def map_view(request):
     # Replace joined_data_path with the actual path to your joined dataset
-    joined_data_path = r"C:\Users\mille\PycharmProjects\naca-react-django-app\NacaMap\data\Income\ACSST5Y2021.S1903-Data_new.csv"
-
+    joined_data_path = r"C:\Users\mille\PycharmProjects\naca-react-django-app\NacaMap\data\joined_data.csv"
     # Read the joined dataset into a pandas dataframe
-    joined_df = pd.read_csv(joined_data_path)
+    df = pd.read_csv(joined_data_path)
 
-    joined_df.dropna()
-
-    joined_df = joined_df.loc[~(joined_df['MedianIncome'].isna())]
+    # Convert the dataframe to a geopandas dataframe and set the geometry column
+    gdf = gpd.GeoDataFrame(df, geometry='geometry')
 
     map = folium.Map(location=[45.5236, -122.6750], zoom_start=13)
 
-    # Add the joined dataset as a choropleth layer
-    folium.Choropleth(
-        geo_data=joined_df,
-        data=joined_df,
-        columns=["GEO_ID", "MedianIncome"],
-        key_on="feature.properties.GEOID",
-        fill_color="YlOrRd",
-        fill_opacity=0.7,
-        line_opacity=0.2,
-        legend_name="Median Income",
-        highlight=True,
-        name="Median Income",
-        overlay=True
+    # Create a GeoJson layer using the 'geometry' and 'MedianIncome' columns
+    folium.GeoJson(
+        data=gdf[['geometry', 'MedianIncome']].to_json(),
+        name='GeoJson',
+        style_function=lambda feature: {
+            'fillColor': '#ff0000' if feature['properties']['MedianIncome'] > 50000 else '#0000ff',
+            'color': '#000000',
+            'weight': 1,
+            'fillOpacity': 0.7,
+        },
+        tooltip=folium.GeoJsonTooltip(
+            fields=['MedianIncome'],
+            aliases=['Median Income'],
+            labels=True,
+            sticky=False
+        ),
+        highlight_function=lambda feature: {
+            'fillColor': '#00ff00',
+            'color': '#000000',
+            'weight': 3,
+            'fillOpacity': 0.7,
+        }
     ).add_to(map)
+
+    # Add a layer control to the map
+    folium.LayerControl().add_to(map)
 
     map = map._repr_html_() # render map as HTML
     return render(request, 'map.html', {'map': map})
