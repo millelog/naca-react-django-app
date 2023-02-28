@@ -10,7 +10,7 @@ Browse to http://127.0.0.1:8000/map/
 
 ## Compile New Shapefile
 
-Edit the main function in `DataExplorer.py` to point at the new state's census tract shapefile. Median income data and metropolitan stasticial area shapefiles included with repo from 2021 in the data folder.   
+Edit the main function in `DataExplorer.py` to point at the new state's census tract shapefile and run it to generate new data source for the map page. Median income data and metropolitan stasticial area shapefiles included with repo from 2021 in the data folder and have entries for the whole US.   
 
 [US Census Tract Shape Files by State](https://www.census.gov/cgi-bin/geo/shapefiles/index.php?year=2022&layergroup=Census+Tracts)
 
