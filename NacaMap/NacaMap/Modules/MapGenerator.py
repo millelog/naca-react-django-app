@@ -24,13 +24,7 @@ class MapGenerator:
     def generate_map(self) -> folium.Map:
 
         # Read the joined dataset into a pandas dataframe
-        df = pd.read_csv(self.data_path)
-
-        # Convert the WKT strings in the geometry column to Shapely objects
-        df['geometry'] = df['geometry'].apply(wkt.loads)
-
-        # Convert the dataframe to a geopandas dataframe and set the geometry column
-        gdf = gpd.GeoDataFrame(df, geometry='geometry')
+        gdf = gpd.read_file(self.data_path)
 
         map = folium.Map(location=[self.latitude, self.longitude], zoom_start=self.zoom_start)
 
