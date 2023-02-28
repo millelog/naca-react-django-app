@@ -14,7 +14,7 @@ def update_map(request):
 
 
 def map_view(request):
-    data_path = r"C:\Users\mille\PycharmProjects\naca-react-django-app\NacaMap\data\joined_data.csv"
+    data_path = r"NacaMap/data/joined_data.csv"
 
     map_generator = MapGenerator(data_path=data_path, latitude=45.5236, longitude=-122.6750, zoom_start=13)
     map = map_generator.generate_map()
