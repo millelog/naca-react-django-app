@@ -46,7 +46,7 @@ def ComputeSpatialDataFrame():
     tract = gpd.read_file(CensusTract_shapefile_path)
 
     # Spatial join to get the CBSAFP id for each census tract
-    tracts_with_cbsafp = gpd.sjoin(tract, msa[['CBSAFP', 'geometry']], how='left', op='within')
+    tracts_with_cbsafp = gpd.sjoin(tract, msa[['CBSAFP', 'geometry']], how='left', op='intersects')
 
     # Drop unnecessary columns
     tracts_with_cbsafp = tracts_with_cbsafp[['STATEFP', 'COUNTYFP', 'TRACTCE', 'CBSAFP', 'GEOID', 'geometry']]
@@ -68,6 +68,9 @@ def ComputeSpatialDataFrame():
     # Add a new column to joined_df with the average median income for each row's CBSAFP
     joined_df['CBSAMedianIncome'] = joined_df['CBSAFP'].map(avg_median_income)
 
+    # Add a new column to joined_df with the color for each row based on the MedianIncome and CBSAMedianIncome values
+    joined_df['color'] = joined_df.apply(lambda x: '#808080' if pd.isna(x['MedianIncome']) or pd.isna(x['CBSAMedianIncome']) else ('#0000ff' if x['MedianIncome'] < x['CBSAMedianIncome'] else '#ff0000'), axis=1)
+
     joined_df = joined_df.to_crs(epsg=4326)
 
     file_path = r"C:\Users\mille\PycharmProjects\naca-react-django-app\NacaMap\data\final_data.csv"
@@ -76,6 +79,7 @@ def ComputeSpatialDataFrame():
     joined_df.to_csv(file_path, index=False)
 
     print("New CSV saved to:", file_path)
+
 
 ComputeSpatialDataFrame()
 

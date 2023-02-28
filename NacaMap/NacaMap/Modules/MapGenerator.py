@@ -12,22 +12,14 @@ class MapGenerator:
         self.zoom_start = zoom_start
 
     def style_function(self, feature):
-        median_income = feature['properties'].get('MedianIncome')
-        cbsa_median_income = feature['properties'].get('CBSAMedianIncome')
-        if median_income is None or cbsa_median_income is None:
-            return {
-                'fillColor': '#808080',  # gray
-                'color': '#000000',
-                'weight': 1,
-                'fillOpacity': 0.7,
-            }
-        else:
-            return {
-                'fillColor': '#ff0000' if median_income > cbsa_median_income else '#0000ff',
-                'color': '#000000',
-                'weight': 1,
-                'fillOpacity': 0.7,
-            }
+        color = feature['properties'].get('color')
+        return {
+            'fillColor': color,  #Logic found in DataExplorer: lambda x: '#808080' if pd.isna(x['MedianIncome']) or pd.isna(x['CBSAMedianIncome']) else ('#0000ff' if x['MedianIncome'] < x['CBSAMedianIncome'] else '#ff0000')
+            'color': '#000000',
+            'weight': 1,
+            'fillOpacity': 0.7,
+        }
+
 
     def generate_map(self) -> folium.Map:
 
@@ -44,7 +36,7 @@ class MapGenerator:
 
         # Create a GeoJson layer using the 'geometry' and 'MedianIncome' columns
         folium.GeoJson(
-            data=gdf[['geometry', 'MedianIncome', 'CBSAMedianIncome']].to_json(),
+            data=gdf[['geometry', 'MedianIncome', 'CBSAMedianIncome', 'color']].to_json(),
             name='GeoJson',
             style_function=self.style_function,
             tooltip=folium.GeoJsonTooltip(
