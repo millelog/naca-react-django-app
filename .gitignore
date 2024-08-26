@@ -46,3 +46,5 @@ spritesmith.scss
 
 # templated email
 tmp_email/
+
+/.venv/
